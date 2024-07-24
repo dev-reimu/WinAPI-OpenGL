@@ -5,7 +5,7 @@
 #define UNICODE
 #endif
 
-#include <windows.h>
+#include <Windows.h>
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -15,13 +15,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     DWORD dwLastError = ERROR_SUCCESS;
     
-    const wchar_t CLASS_NAME[]  = L"Reimu Animate Window Class";
+    const wchar_t WINDOW_CLASS_NAME[]  = L"Reimu Animate";
 
     const WNDCLASSW wc = {
         .lpfnWndProc   = WindowProc, 
         .hInstance     = hInstance, 
-        .lpszClassName = CLASS_NAME, 
-        .cbWndExtra = sizeof(HDC) + sizeof(HGLRC)
+        .lpszClassName = WINDOW_CLASS_NAME, 
+        .cbWndExtra    = sizeof(HDC) + sizeof(HGLRC)
     };
 
     ATOM atom = RegisterClassW(&wc);
@@ -36,8 +36,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     HWND hWnd = CreateWindowExW(
         0, 
-        CLASS_NAME,                 // Window class
-        L"Reimu Animate",           // Window title
+        WINDOW_CLASS_NAME,          // Window class
+        WINDOW_CLASS_NAME,          // Window title
 
         // Window style
         CS_OWNDC | WS_TILEDWINDOW | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX, 
