@@ -11,27 +11,36 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 
-    // Register the window class.
+    // Register the window class
+
+    DWORD dwLastError = ERROR_SUCCESS;
     
     const wchar_t CLASS_NAME[]  = L"Reimu Animate Window Class";
 
-    WNDCLASS wc = { };
+    const WNDCLASSW wc = {
+        .lpfnWndProc   = WindowProc, 
+        .hInstance     = hInstance, 
+        .lpszClassName = CLASS_NAME, 
+        .cbWndExtra = sizeof(HDC) + sizeof(HGLRC)
+    };
 
-    wc.lpfnWndProc   = WindowProc;
-    wc.hInstance     = hInstance;
-    wc.lpszClassName = CLASS_NAME;
+    ATOM atom = RegisterClassW(&wc);
 
-    RegisterClass(&wc);
+    if (atom == INVALID_ATOM)
+    {
+        dwLastError = GetLastError();
+        return -1;
+    }
 
-    // Create the window.
+    // Create the window
 
-    HWND hwnd = CreateWindowEx(
-        0,                          // Optional window styles
+    HWND hWnd = CreateWindowExW(
+        0, 
         CLASS_NAME,                 // Window class
         L"Reimu Animate",           // Window title
 
         // Window style
-        WS_TILEDWINDOW | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX, 
+        CS_OWNDC | WS_TILEDWINDOW | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX, 
 
         // Size and positions
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
@@ -39,13 +48,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         NULL,           // Parent window
         NULL,           // Menu
         hInstance,      // Instance handle
-        NULL            // Additional application data
+        NULL            // Additional window data
     );
 
-    if (hwnd == NULL)
-        return 0;
+    if (hWnd == NULL)
+    {
+        dwLastError = GetLastError();
+        return -1;
+    }
 
-    ShowWindow(hwnd, SW_MAXIMIZE);
+    ShowWindow(hWnd, SW_MAXIMIZE);
 
     // Run the message loop
 
