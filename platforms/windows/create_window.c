@@ -5,63 +5,39 @@
 #define UNICODE
 #endif
 
-#include <Windows.h>
+#include <windows.h>
+#include <GL/GL.h>
+
+#pragma comment (lib, "opengl32.lib")
+
+
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+
+
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
 
-    // Register the window class
-
-    DWORD dwLastError = ERROR_SUCCESS;
-    
-    const wchar_t WINDOW_CLASS_NAME[]  = L"Reimu Animate";
-
-    const WNDCLASSW wc = {
-        .lpfnWndProc   = WindowProc, 
-        .hInstance     = hInstance, 
-        .lpszClassName = WINDOW_CLASS_NAME, 
-        .cbWndExtra    = sizeof(HDC) + sizeof(HGLRC)
-    };
+    MSG msg          = {0};
+	WNDCLASSW wc      = {0}; 
+	wc.lpfnWndProc   = WindowProc;
+	wc.hInstance     = hInstance;
+	wc.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
+	wc.lpszClassName = L"Reimu Animate";
+	wc.style = CS_OWNDC;
 
     ATOM atom = RegisterClassW(&wc);
-
     if (atom == INVALID_ATOM)
-    {
-        dwLastError = GetLastError();
-        return -1;
-    }
+        return 1;
 
-    // Create the window
-
-    HWND hWnd = CreateWindowExW(
-        0, 
-        WINDOW_CLASS_NAME,          // Window class
-        WINDOW_CLASS_NAME,          // Window title
-
-        // Window style
-        CS_OWNDC | WS_TILEDWINDOW | WS_CAPTION | WS_MAXIMIZEBOX | WS_MINIMIZEBOX, 
-
-        // Size and positions
+    HWND hwnd = CreateWindowExW(0, wc.lpszClassName, L"Reimu Animate", 
+        CS_OWNDC | WS_OVERLAPPEDWINDOW, 
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
-
-        NULL,           // Parent window
-        NULL,           // Menu
-        hInstance,      // Instance handle
-        NULL            // Additional window data
-    );
-
-    if (hWnd == NULL)
-    {
-        dwLastError = GetLastError();
-        return -1;
-    }
-
-    ShowWindow(hWnd, SW_MAXIMIZE);
-
-    // Run the message loop
-
-    MSG msg = { };
+        NULL, NULL, hInstance, NULL);
+    if (hwnd == NULL)
+        return 1;
+    ShowWindow(hwnd, SW_MAXIMIZE);
+    
     while (GetMessage(&msg, NULL, 0, 0) > 0) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
@@ -77,19 +53,38 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case WM_DESTROY:
             PostQuitMessage(0);
             return 0;
-
-        case WM_PAINT:
-            {
-                PAINTSTRUCT ps;
-                HDC hdc = BeginPaint(hwnd, &ps);
-
-                // All painting occurs here, between BeginPaint and EndPaint.
-
-                FillRect(hdc, &ps.rcPaint, (HBRUSH) (COLOR_WINDOW+1));
-
-                EndPaint(hwnd, &ps);
-            }
+        
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hwnd, &ps);
+            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOWTEXT));
+            EndPaint(hwnd, &ps);
             return 0;
+        }
+
+        case WM_CREATE: {
+                PIXELFORMATDESCRIPTOR pfd = {
+                    sizeof(PIXELFORMATDESCRIPTOR),
+                    1,
+                    PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,    //Flags
+                    PFD_TYPE_RGBA,        // The kind of framebuffer. RGBA or palette.
+                    32,                   // Colordepth of the framebuffer.
+                    0, 0, 0, 0, 0, 0,
+                    0,
+                    0,
+                    0,
+                    0, 0, 0, 0,
+                    24,                   // Number of bits for the depthbuffer
+                    8,                    // Number of bits for the stencilbuffer
+                    0,                    // Number of Aux buffers in the framebuffer.
+                    PFD_MAIN_PLANE,
+                    0,
+                    0, 0, 0
+                };
+
+                HDC ourWindowHandleToDeviceContext = GetDC(hwnd);
+        }
+        return 0;
     }
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
