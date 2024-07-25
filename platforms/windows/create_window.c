@@ -21,7 +21,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	wc.lpfnWndProc   = WindowProc;
 	wc.hInstance     = hInstance;
 	wc.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
-	wc.lpszClassName = L"Reimu Animate";
+	wc.lpszClassName = L"Reimu_Animate_Window";
 	wc.style = CS_OWNDC;
 
     ATOM atom = RegisterClassW(&wc);
