@@ -7,6 +7,7 @@
 
 #include <windows.h>
 #include <GL/gl.h>
+#include "open_gl.h"
 
 #pragma comment (lib, "opengl32.lib")
 
@@ -84,20 +85,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
             DispatchMessage(&msg);
         }
 
-        glClearColor(0.1f, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
- 
-        glBegin(GL_TRIANGLES);
-
-        glColor3f(1, 0, 0);
-        glVertex2f(0, 0.5f);
-        glColor3f(0, 1, 0);
-        glVertex2f(-0.25f, -0.5f);
-        glColor3f(0, 0, 1);
-        glVertex2f(0.25f, -0.5f);
-
-        glEnd();
-        SwapBuffers(dc);
+        opengl_init(dc);
     }
 
     return 0;
