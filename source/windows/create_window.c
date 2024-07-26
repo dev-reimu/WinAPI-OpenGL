@@ -12,38 +12,6 @@
 
 
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
-
-    MSG msg          = {0};
-	WNDCLASSW wc     = {0};
-	wc.lpfnWndProc   = WindowProc;
-	wc.hInstance     = hInstance;
-	wc.hbrBackground = (HBRUSH)(COLOR_BACKGROUND);
-	wc.lpszClassName = L"Reimu_Animate_Window";
-	wc.style = CS_OWNDC;
-
-    ATOM atom = RegisterClassW(&wc);
-    if (atom == INVALID_ATOM)
-        return 1;
-
-    HWND hwnd = CreateWindowExW(0, wc.lpszClassName, L"Reimu Animate", 
-        CS_OWNDC | WS_OVERLAPPEDWINDOW, 
-        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
-        NULL, NULL, hInstance, NULL);
-    if (hwnd == NULL)
-        return 1;
-    ShowWindow(hwnd, SW_MAXIMIZE);
-    
-    while (GetMessage(&msg, NULL, 0, 0) > 0) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-
-    return 0;
-}
-
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
@@ -61,44 +29,76 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return 0;
         }
 
-        case WM_CREATE: {
-            PIXELFORMATDESCRIPTOR pfd = {
-                sizeof(PIXELFORMATDESCRIPTOR),
-                1,
-                // Flags
-                PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, 
-                PFD_TYPE_RGBA,        // The kind of framebuffer. RGBA or palette.
-                32,                   // Colordepth of the framebuffer.
-                0, 0, 0, 0, 0, 0,
-                0,
-                0,
-                0,
-                0, 0, 0, 0,
-                24,                   // Number of bits for the depthbuffer
-                8,                    // Number of bits for the stencilbuffer
-                0,                    // Number of Aux buffers in the framebuffer.
-                PFD_MAIN_PLANE,
-                0,
-                0, 0, 0
-            };
-
-            HDC ourWindowHandleToDeviceContext = GetDC(hwnd);
-
-            int letWindowsChooseThisPixelFormat;
-            letWindowsChooseThisPixelFormat = ChoosePixelFormat(ourWindowHandleToDeviceContext, &pfd); 
-            SetPixelFormat(ourWindowHandleToDeviceContext,letWindowsChooseThisPixelFormat, &pfd);
-
-            HGLRC ourOpenGLRenderingContext = wglCreateContext(ourWindowHandleToDeviceContext);
-            wglMakeCurrent (ourWindowHandleToDeviceContext, ourOpenGLRenderingContext);
-
-            MessageBoxA(0, (char*)glGetString(GL_VERSION), "OPENGL VERSION", 0);
-
-            wglMakeCurrent(ourWindowHandleToDeviceContext, ourOpenGLRenderingContext);
-            // wglDeleteContext(ourOpenGLRenderingContext);
-        }
-
         break;
     }
 
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+
+
+
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
+
+	WNDCLASSW wc        = {0};
+	wc.lpfnWndProc      = WindowProc;
+    wc.style            = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
+	wc.hInstance        = hInstance;
+	wc.hbrBackground    = (HBRUSH)(COLOR_BACKGROUND);
+	wc.lpszClassName    = L"Reimu_Animate_Window";
+
+    ATOM atom = RegisterClassW(&wc);
+    if (atom == INVALID_ATOM)
+        return 1;
+
+    HWND window = CreateWindowExW(0, wc.lpszClassName, L"Reimu Animate", 
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
+        CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, 
+        NULL, NULL, hInstance, NULL);
+    if (window == NULL)
+        return 1;
+    ShowWindow(window, SW_MAXIMIZE);
+
+    HDC dc = GetDC(window);
+  
+    PIXELFORMATDESCRIPTOR pfd = {0};
+    pfd.nSize = sizeof(pfd);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.cColorBits = 32;
+    pfd.cAlphaBits = 8;
+    pfd.cDepthBits = 24;
+    int format = ChoosePixelFormat(dc, &pfd);
+    SetPixelFormat(dc, format, &pfd);
+    
+    HGLRC glrc = wglCreateContext(dc);
+    wglMakeCurrent(dc, glrc);
+
+    MSG msg = {0};
+
+    while (TRUE) {
+
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0) {
+            if (msg.message == WM_QUIT)
+                return 0;
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+
+        glClearColor(0.1f, 0, 0, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+ 
+        glBegin(GL_TRIANGLES);
+
+        glColor3f(1, 0, 0);
+        glVertex2f(0, 0.5f);
+        glColor3f(0, 1, 0);
+        glVertex2f(-0.25f, -0.5f);
+        glColor3f(0, 0, 1);
+        glVertex2f(0.25f, -0.5f);
+
+        glEnd();
+        SwapBuffers(dc);
+    }
+
+    return 0;
 }
