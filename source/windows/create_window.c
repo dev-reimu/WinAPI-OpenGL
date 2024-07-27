@@ -76,6 +76,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
     MSG msg = {0};
 
+
+
+    ///////////////
+    // MAIN LOOP //
+    ///////////////
+
     while (TRUE) {
 
         while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0) {
@@ -87,6 +93,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
         opengl_init(dc);
     }
+
+    
 
     return 0;
 }
