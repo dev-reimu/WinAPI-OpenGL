@@ -5,4 +5,4 @@
 
 #pragma comment (lib, "opengl32.lib")
 
-void opengl_init(HDC dc);
+void opengl_update(HDC dc);

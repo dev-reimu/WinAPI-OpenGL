@@ -3,7 +3,7 @@
 
 
 
-void opengl_init(HDC dc) {
+void opengl_update(HDC dc) {
 
     glClearColor(0.1f, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
